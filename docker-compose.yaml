@@ -12,6 +12,7 @@ services:
       - "5000:5000"
     depends_on:
       - "db"
+    env_file: ./backend/.env
 
   db:
     image: postgres:latest
