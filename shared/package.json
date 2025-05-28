@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "typescript": "^5.8.3"
+    "dayjs": "^1.11.13",
+    "typescript": "^5.8.3",
+    "zod": "^3.25.32"
   }
 }
