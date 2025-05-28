@@ -4,8 +4,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 
 import * as middlewares from './middlewares';
-import api from './api';
-import MessageResponse from './interfaces/MessageResponse';
+import cpe_event_api from './cpe_event_api';
 
 require('dotenv').config();
 
@@ -16,13 +15,7 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
-app.get<{}, MessageResponse>('/', (req, res) => {
-  res.json({
-    message: '🦄🌈✨👋🌎🌍🌏✨🌈🦄',
-  });
-});
-
-app.use('/api/v1', api);
+app.use('/api/v1', cpe_event_api)
 
 app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
