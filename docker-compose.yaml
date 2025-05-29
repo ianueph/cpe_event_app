@@ -1,13 +1,21 @@
 services:
   frontend:
-    build: ./frontend/cpe-event-app
+    build: 
+      context: ./frontend/cpe-event-app
+      dockerfile: Dockerfile
+      additional_contexts:
+        shared: ./shared
     ports:
       - "3000:3000"
     depends_on:
       - backend
 
   backend:
-    build: ./backend
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+      additional_contexts:
+        shared: ./shared
     ports:
       - "5000:5000"
     depends_on:
@@ -21,4 +29,5 @@ services:
     env_file: ./db/.env
     volumes:
       - ./db:/docker-entrypoint-initdb.d
+      
     
