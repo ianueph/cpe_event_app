@@ -1,14 +1,16 @@
 import { z } from "zod/v4";
 import dayjs from "dayjs";
 
-export const EventTypes = z.enum([
+export type Event = z.infer<typeof eventSchema>
+
+export const eventEnum = z.enum([
     "Conference",
     "Meeting",
     "Sports",
     "Whatever",
 ])
 
-export const Event = z.object({
+export const eventSchema = z.object({
     event_id: z
     .coerce
     .number()
@@ -27,7 +29,7 @@ export const Event = z.object({
     .max(4096)
     .optional(),
 
-    event_type: EventTypes,
+    event_type: eventEnum,
 
     date: z
     .iso

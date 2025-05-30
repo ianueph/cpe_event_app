@@ -1,6 +1,8 @@
 import { z } from "zod/v4";
 
-export const Attendee = z.object({
+export type Attendee = z.infer<typeof attendeeSchema>
+
+export const attendeeSchema = z.object({
     id: z
     .coerce
     .number()

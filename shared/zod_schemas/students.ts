@@ -1,20 +1,22 @@
 import { z } from "zod/v4";
 
-export const ProgramTypes = z.enum([
+export type Student = z.infer<typeof studentSchema>;
+
+export const programEnum = z.enum([
     "Mechanical Engineering",
     "Computer Engineering",
     "Civil Engineering",
     "Electrical Engineering"
 ])
 
-export const YearLevelTypes = z.enum([
+export const yearLevelEnum = z.enum([
     "1st",
     "2nd",
     "3rd",
     "4th"
 ])
 
-export const Student = z.object({
+export const studentSchema = z.object({
     id: z
     .coerce
     .number()
@@ -39,9 +41,9 @@ export const Student = z.object({
     .max(10)
     .nonempty(),
 
-    program: ProgramTypes,
+    program: programEnum,
 
-    current_year: YearLevelTypes,
+    current_year: yearLevelEnum,
 
     ue_email: z
     .email()
