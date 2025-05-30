@@ -66,12 +66,21 @@ export const paginationMetadataSchema = z.object({
     .nonnegative(),
 })
 
-export const paginationResponseSchema = <T extends z.ZodAny>(dataSchema: T) => 
+export const paginatedResponseSchema = <T extends z.ZodType>(dataSchema: T) => 
     z.object({
         data: dataSchema.array(),
         meta: paginationMetadataSchema,
         links: linkMetadataSchema.array(),
     });
 
+export const apiResponseSchema = <T extends z.ZodType>(dataSchema: T) => 
+    z.object({
+        data: dataSchema.array(),
+        meta: {
+            pagination: paginationMetadataSchema,
+            // something else maybe for v2?
+        },
+        links: linkMetadataSchema.array(),
+    });
 
 

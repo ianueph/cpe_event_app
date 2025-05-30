@@ -1,7 +1,9 @@
 import { z } from "zod/v4";
 import dayjs from "dayjs";
+import { apiResponseSchema } from "./metadata";
 
 export type Event = z.infer<typeof eventSchema>
+export type EventResponse = z.infer<typeof eventResponseSchema>
 
 export const eventEnum = z.enum([
     "Conference",
@@ -71,3 +73,5 @@ export const eventSchema = z.object({
         }
     }
 )
+
+export const eventResponseSchema = apiResponseSchema(eventSchema)

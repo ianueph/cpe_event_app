@@ -1,6 +1,8 @@
 import { z } from "zod/v4";
+import { apiResponseSchema } from "./metadata";
 
 export type Student = z.infer<typeof studentSchema>;
+export type studentSchema = z.infer<typeof studentResponseSchema>;
 
 export const programEnum = z.enum([
     "Mechanical Engineering",
@@ -62,3 +64,5 @@ export const studentSchema = z.object({
     .length(11)
     .nonempty()
 })
+
+export const studentResponseSchema = apiResponseSchema(studentSchema)
