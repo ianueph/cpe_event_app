@@ -1,0 +1,237 @@
+/** 
+GET 	  /attendees/:event_id
+GET 	  /attendees/:student_number
+GET 	  /attendees/:id
+GET 	  /attendees/
+POST	  /attendees/
+PUT   	/attendees/:id
+DELETE  /attendees/:id
+**/
+
+import express from 'express';
+import db from "../db";
+import { Attendee, attendeeCreateSchema, AttendeeData, attendeeDataSchema, AttendeeResponse, attendeeResponseSchema, attendeeSchema } from "../../../../shared/zod_schemas/attendees"
+import { LinkMetadata, paginationParameterSchema } from "../../../../shared/zod_schemas/metadata"
+import { 
+  eventIdExists, 
+  studentNumberExists, 
+  attendeeIdExists 
+} from '../handlers/checkers';
+import { Query, QueryConfig } from 'pg';
+import { getOffset, getTotalPages } from '../utils/pagination';
+import { getPaginationLinks } from '../utils/links';
+
+const router = express.Router();
+
+/*
+Parameter validation
+*/
+router.param('event_id', async (req, res, next) => {
+  const event_id = req.params.event_id; 
+  
+  const idSchema = attendeeSchema.shape.event_id;
+  const parsed = idSchema.safeParse(event_id);
+
+  if (!parsed.success) { 
+    next(parsed.error);
+    return;
+  }
+
+  try {
+    const exists = await eventIdExists(parsed.data);
+
+    if (!exists) {
+      return res.status(404).json({ error: "Event not found"})
+    }
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+})
+router.param('student_number', async (req, res, next) => {
+  const student_number = req.params.student_number; 
+  
+  const studentNumberSchema = attendeeSchema.shape.student_number;
+  const parsed = studentNumberSchema.safeParse(student_number);
+
+  if (!parsed.success) { 
+    next(parsed.error);
+    return;
+  }
+
+  try {
+    const exists = await studentNumberExists(parsed.data);
+
+    if (!exists) {
+      return res.status(404).json({ error: "Student not found"})
+    }
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+})
+router.param('id', async (req, res, next) => {
+  const attendee_id = req.params.id; 
+  
+  const idSchema = attendeeSchema.shape.id;
+  const parsed = idSchema.safeParse(attendee_id);
+
+  if (!parsed.success) { 
+    next(parsed.error);
+    return;
+  }
+
+  try {
+    const exists = await attendeeIdExists(parsed.data);
+
+    if (!exists) {
+      return res.status(404).json({ error: "Attendee not found"})
+    }
+
+    next();
+  } catch (err) {
+    next(err);
+  } 
+})
+
+/*
+Declare routes
+*/
+
+router.get("/event/:event_id", (req, res) => {
+  // return all attendees by event_id, paginated
+});
+router.get("/student/:student_number", (req, res) => {
+  // return all attended events by student_number, paginated
+});
+router.route('/')
+  .get(async (req, res, next) => {
+    const pagination = req.query;
+    const parsed = paginationParameterSchema.safeParse(pagination);
+
+    if (!parsed.success) { 
+      res.status(400);
+      next(parsed.error);
+      return;
+    }
+
+    const page = parsed.data.page;
+    const size = parsed.data.size;
+    const offset = getOffset(page, size)
+
+    const fetchQuery : QueryConfig = {
+      text: "SELECT * FROM attendees ORDER BY id DESC LIMIT $1 OFFSET $2",
+      values: [size, offset]
+    }
+    const countQuery : QueryConfig = {
+      text: "SELECT COUNT(*) FROM attendees"
+    }
+
+    const fetchResult = await db.query(fetchQuery);
+    const countResult = await db.query(countQuery);
+
+    if (!countResult.rowCount) {
+      res.status(200).json({
+        data: [],
+        meta: [],
+        links: [],
+      })
+      return;
+    }
+
+    const totalEntries = countResult.rowCount;
+    const totalPages =  getTotalPages(totalEntries, size);
+
+    const data : AttendeeData[] = fetchResult.rows.map((attendee : Attendee) => ({
+      ...attendee,
+      links: [
+        {rel: "self", href: `/attendees/${attendee.id}`},
+        {rel: "event", href: `/attendees/event/${attendee.event_id}`},
+        {rel: "student", href: `/attendees/student_number/${attendee.student_number}`},
+      ]
+    }));
+
+    const links : LinkMetadata[] = getPaginationLinks('/attendees/', page, size, totalEntries);
+
+    const response : AttendeeResponse = {
+      data: data,
+      meta: {
+        pagination: {
+          page: page,
+          size: size,
+          offset: offset,
+          total_entries: totalEntries,
+          total_pages: totalPages
+        }
+      },
+      links: links
+    }
+
+    const parsedResponse = attendeeResponseSchema.safeParse(response);
+
+    if (!parsedResponse.success) { 
+      console.error("Internal server error: Response schema validation failed", parsedResponse.error);
+      res.status(500).json({ error: "Internal server error. "})
+      return;
+    }
+    
+    res.status(200).json(response)
+  })
+  .post(async (req, res, next) => {
+    const attendee = req.body;  
+
+    const parsed = attendeeCreateSchema.safeParse(attendee);
+    if (!parsed.success) { 
+      res.status(400)
+      next(parsed.error);
+      return;
+    }
+
+    const { event_id, payment, student_number } = parsed.data
+
+    const insertQuery : QueryConfig = {
+      text: "INSERT INTO attendees(event_id, payment, student_number) VALUES($1, $2, $3) RETURNING *",
+      values: [event_id, payment, student_number]
+    }
+
+    const result = await db.query(insertQuery);
+
+    if (!result.rowCount) {
+      console.error("Internal server error: Attendee creation failed");
+      res.status(500).json({ error: "Internal server error. "});
+      return;
+    }
+
+    const data : AttendeeData[] = result.rows.map((attendee : Attendee) => ({
+      ...attendee,
+      links: [
+        {rel: "self", href: `/attendees/${attendee.id}`},
+        {rel: "event", href: `/attendees/event/${attendee.event_id}`},
+        {rel: "student", href: `/attendees/student_number/${attendee.student_number}`},
+      ]
+    }));
+
+    const parsedData = attendeeDataSchema.safeParse(data[0]);
+
+    if (!parsedData.success) { 
+      console.error("Internal server error: Response schema validation failed", parsedData.error);
+      res.status(500).json({ error: "Internal server error. "})
+      return;
+    }
+
+    res.status(200).json(parsedData.data);
+  })
+router.route('/:id')
+  .get((req, res) => {
+    // return attendee by ID
+  })
+  .put((req, res) => {
+    // updates an existing entry
+  })
+  .delete((req, res) => {
+    // delete an entry
+  })
+
+export default router;
