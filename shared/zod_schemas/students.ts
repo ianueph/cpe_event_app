@@ -1,5 +1,5 @@
 import { z } from "zod/v4";
-import { apiResponseSchema } from "./metadata";
+import { apiResponseSchema, linkMetadataSchema } from "./metadata";
 
 export type Student = z.infer<typeof studentSchema>;
 export type studentSchema = z.infer<typeof studentResponseSchema>;
@@ -63,6 +63,10 @@ export const studentSchema = z.object({
     .string()
     .length(11)
     .nonempty()
+})
+
+export const studentDataSchema = studentSchema.extend({
+    links: linkMetadataSchema.array()
 })
 
 export const studentResponseSchema = apiResponseSchema(studentSchema)

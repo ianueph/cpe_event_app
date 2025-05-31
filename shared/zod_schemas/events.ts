@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 import dayjs from "dayjs";
-import { apiResponseSchema } from "./metadata";
+import { apiResponseSchema, linkMetadataSchema } from "./metadata";
 
 export type Event = z.infer<typeof eventSchema>
 export type EventResponse = z.infer<typeof eventResponseSchema>
@@ -73,5 +73,9 @@ export const eventSchema = z.object({
         }
     }
 )
+
+export const eventDataSchema = eventSchema.extend({
+    links: linkMetadataSchema.array()
+})
 
 export const eventResponseSchema = apiResponseSchema(eventSchema)
