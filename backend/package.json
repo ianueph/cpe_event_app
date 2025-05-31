@@ -7,7 +7,8 @@
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "start:dist": "node dist/src/index.js",
+    "start:dist": "node ./dist/backend/src/index.js",
+    "start:docker": "node ./dist/app/src/index.js",
     "lint": "eslint --fix src test",
     "test": "jest",
     "typecheck": "tsc --noEmit"
