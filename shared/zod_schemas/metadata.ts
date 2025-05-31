@@ -11,7 +11,8 @@ export const linkMetadataSchema = z.object({
     .nonoptional(),
 
     href: z
-    .url()
+    .coerce
+    .string()
     .nonoptional()
 })
 
@@ -51,7 +52,7 @@ export const paginationMetadataSchema = z.object({
     offset: z
     .coerce
     .number()
-    .min(1)
+    .min(0)
     .max(999*999)
     .default(10),
 
@@ -80,7 +81,7 @@ export const apiResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
             pagination: paginationMetadataSchema.optional(),
             // something else maybe for v2?
         }),
-        links: linkMetadataSchema.array(),
+        links: linkMetadataSchema.array().optional(),
     });
 
 
