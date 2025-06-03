@@ -16,7 +16,7 @@ export function getPaginationLinks(
       links.push({ rel: "next", href: `${endpoint}?page=${page + 1}&size=${size}` });
     }
 
-    if (page > 1) {
+    if (page > 1 && page <= totalPages) {
       links.push({ rel: "prev", href: `${endpoint}?page=${page - 1}&size=${size}` });
     }
 
