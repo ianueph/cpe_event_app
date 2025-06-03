@@ -40,64 +40,64 @@ router.param('event_id', async (req, res, next) => {
 router.route("/")
 	.get(async (req, res, next) => {
 		const pagination = req.query;
-    const parsed = paginationParameterSchema.safeParse(pagination);
+		const parsed = paginationParameterSchema.safeParse(pagination);
 
-    if (!parsed.success) { 
-      res.status(400);
-      next(parsed.error);
-      return;
-    }
+		if (!parsed.success) { 
+		res.status(400);
+		next(parsed.error);
+		return;
+		}
 
-    const {page, size} = parsed.data
-    const offset = getOffset(page, size)
+		const {page, size} = parsed.data
+		const offset = getOffset(page, size)
 
-    const fetchQuery : QueryConfig = {
-      text: "SELECT * FROM events ORDER BY event_id DESC LIMIT $1 OFFSET $2",
-      values: [size, offset]
-    }
-    const countQuery : QueryConfig = {
-      text: "SELECT COUNT(*) FROM events"
-    }
+		const fetchQuery : QueryConfig = {
+		text: "SELECT * FROM events ORDER BY event_id DESC LIMIT $1 OFFSET $2",
+		values: [size, offset]
+		}
+		const countQuery : QueryConfig = {
+		text: "SELECT COUNT(*) FROM events"
+		}
 
-    const fetchResult = await db.query(fetchQuery);
-    const countResult = await db.query(countQuery);
+		const fetchResult = await db.query(fetchQuery);
+		const countResult = await db.query(countQuery);
 
-    const rows = fetchResult.rows as Event[]
-    const data : EventData[] = rows.map((event) => ({
-      ...event,
-      links: [
-        {rel: "self", href: `/events/${event.event_id}`},
-      ]
-    }));
+		const rows = fetchResult.rows as Event[]
+		const data : EventData[] = rows.map((event) => ({
+		...event,
+		links: [
+			{rel: "self", href: `/events/${event.event_id}`},
+		]
+		}));
 
-    const totalEntries = parseInt(countResult.rows[0].count)
-    const totalPages =  getTotalPages(totalEntries, size);
+		const totalEntries = parseInt(countResult.rows[0].count)
+		const totalPages =  getTotalPages(totalEntries, size);
 
-    const links : LinkMetadata[] = getPaginationLinks('/events/', page, size, totalEntries);
+		const links : LinkMetadata[] = getPaginationLinks('/events/', page, size, totalEntries);
 
-    const response : EventResponse = {
-      data: data,
-      meta: {
-        pagination: {
-          page: page,
-          size: size,
-          offset: offset,
-          total_entries: totalEntries,
-          total_pages: totalPages
-        }
-      },
-      links: links
-    }
+		const response : EventResponse = {
+		data: data,
+		meta: {
+			pagination: {
+			page: page,
+			size: size,
+			offset: offset,
+			total_entries: totalEntries,
+			total_pages: totalPages
+			}
+		},
+		links: links
+		}
 
-    const parsedResponse = eventResponseSchema.safeParse(response);
+		const parsedResponse = eventResponseSchema.safeParse(response);
 
-    if (!parsedResponse.success) { 
-      res.status(500);
-      next(parsedResponse.error);
-      return;
-    }
-    
-    res.status(200).json(response);
+		if (!parsedResponse.success) { 
+		res.status(500);
+		next(parsedResponse.error);
+		return;
+		}
+		
+		res.status(200).json(response);
 	})
 	.post(async (req, res, next) => {
 		const event = req.body;  
@@ -105,8 +105,7 @@ router.route("/")
 		const parsed = eventCreateSchema.safeParse(event);
 		if (!parsed.success) { 
 			res.status(400);
-			next(parsed.error);
-			return;
+			throw parsed.error;
 		}
 
 		const {
