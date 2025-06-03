@@ -20,6 +20,7 @@ import {
 import { Query, QueryConfig } from 'pg';
 import { getOffset, getTotalPages } from '../utils/pagination';
 import { getPaginationLinks } from '../utils/links';
+import { z } from 'zod';
 
 require('express-async-errors');
 const router = express.Router();
