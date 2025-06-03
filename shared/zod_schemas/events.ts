@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { apiResponseSchema, linkMetadataSchema } from "./metadata";
 
 export type Event = z.infer<typeof eventSchema>
+export type EventData = z.infer<typeof eventDataSchema>
 export type EventResponse = z.infer<typeof eventResponseSchema>
 
 export const eventEnum = z.enum([
@@ -34,20 +35,16 @@ export const eventSchema = z.object({
     event_type: eventEnum,
 
     date: z
-    .iso
+    .coerce
     .date(),
 
     start_time: z
-    .iso
-    .datetime({
-        offset: true
-    }),
+    .coerce
+    .date(),
 
     end_time: z
-    .iso
-    .datetime({
-        offset: true
-    }),
+    .coerce
+    .date(),
 
     registration_fee: z
     .float32()
@@ -73,6 +70,10 @@ export const eventSchema = z.object({
         }
     }
 )
+
+export const eventCreateSchema = eventSchema.omit({
+    event_id: true
+})
 
 export const eventDataSchema = eventSchema.extend({
     links: linkMetadataSchema.array()
