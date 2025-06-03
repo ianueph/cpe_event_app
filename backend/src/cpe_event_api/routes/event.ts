@@ -51,11 +51,11 @@ router.route("/")
 		const offset = getOffset(page, size)
 
 		const fetchQuery : QueryConfig = {
-		text: "SELECT * FROM events ORDER BY event_id DESC LIMIT $1 OFFSET $2",
-		values: [size, offset]
+			text: "SELECT * FROM events ORDER BY event_id DESC LIMIT $1 OFFSET $2",
+			values: [size, offset]
 		}
 		const countQuery : QueryConfig = {
-		text: "SELECT COUNT(*) FROM events"
+			text: "SELECT COUNT(*) FROM events"
 		}
 
 		const fetchResult = await db.query(fetchQuery);
@@ -63,10 +63,10 @@ router.route("/")
 
 		const rows = fetchResult.rows as Event[]
 		const data : EventData[] = rows.map((event) => ({
-		...event,
-		links: [
-			{rel: "self", href: `/events/${event.event_id}`},
-		]
+			...event,
+			links: [
+				{rel: "self", href: `/events/${event.event_id}`},
+			]
 		}));
 
 		const totalEntries = parseInt(countResult.rows[0].count)
@@ -75,17 +75,17 @@ router.route("/")
 		const links : LinkMetadata[] = getPaginationLinks('/events/', page, size, totalEntries);
 
 		const response : EventResponse = {
-		data: data,
-		meta: {
-			pagination: {
-			page: page,
-			size: size,
-			offset: offset,
-			total_entries: totalEntries,
-			total_pages: totalPages
-			}
-		},
-		links: links
+			data: data,
+			meta: {
+				pagination: {
+				page: page,
+				size: size,
+				offset: offset,
+				total_entries: totalEntries,
+				total_pages: totalPages
+				}
+			},
+			links: links
 		}
 
 		const parsedResponse = eventResponseSchema.safeParse(response);
