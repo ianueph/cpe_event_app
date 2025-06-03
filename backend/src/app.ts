@@ -7,6 +7,7 @@ import * as middlewares from './middlewares';
 import cpe_event_api from './cpe_event_api';
 
 require('dotenv').config();
+require('express-async-errors');
 
 const app = express();
 
