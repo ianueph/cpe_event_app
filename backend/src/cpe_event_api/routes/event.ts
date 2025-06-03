@@ -43,9 +43,8 @@ router.route("/")
 		const parsed = paginationParameterSchema.safeParse(pagination);
 
 		if (!parsed.success) { 
-		res.status(400);
-		next(parsed.error);
-		return;
+			res.status(400);
+			throw parsed.error;
 		}
 
 		const {page, size} = parsed.data
@@ -92,9 +91,8 @@ router.route("/")
 		const parsedResponse = eventResponseSchema.safeParse(response);
 
 		if (!parsedResponse.success) { 
-		res.status(500);
-		next(parsedResponse.error);
-		return;
+			res.status(500);
+			throw parsedResponse.error;
 		}
 		
 		res.status(200).json(response);
