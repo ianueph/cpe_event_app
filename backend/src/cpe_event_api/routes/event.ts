@@ -165,4 +165,39 @@ router.route("/")
 		res.status(200).json(parsedData.data);
 	})
 
+router.route('/:event_id')
+	.get(async (req, res) => {
+		const event_id = req.params.event_id
+
+		const query : QueryConfig = {
+			text: "SELECT 1 FROM events WHERE event_id = $1",
+			values: [event_id]
+		}
+
+		const result = await db.query(query);
+
+		const rows = result.rows as Event[];
+		const data : EventData[] = rows.map((event) => ({
+			...event,
+			links: [
+				{rel: "self", href: `/events/${event.event_id}`}
+			]
+		}));
+
+		const parsedData = eventDataSchema.safeParse(data[0]);
+
+		if (!parsedData.success) { 
+			res.status(500)
+			throw parsedData.error;
+		}
+
+		res.status(200).json(parsedData.data);
+	})
+	.put((req, res) => {
+	// updates an existing entry
+	})
+	.delete((req, res) => {
+	// delete an entry
+	})
+
 export default router;
