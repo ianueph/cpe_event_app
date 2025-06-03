@@ -21,6 +21,7 @@ import { Query, QueryConfig } from 'pg';
 import { getOffset, getTotalPages } from '../utils/pagination';
 import { getPaginationLinks } from '../utils/links';
 
+require('express-async-errors');
 const router = express.Router();
 
 /*
@@ -33,21 +34,18 @@ router.param('event_id', async (req, res, next) => {
   const parsed = idSchema.safeParse(event_id);
 
   if (!parsed.success) { 
-    next(parsed.error);
-    return;
+    res.status(400);
+    throw parsed.error
   }
 
-  try {
-    const exists = await eventIdExists(parsed.data);
+  const exists = await eventIdExists(parsed.data);
 
-    if (!exists) {
-      return res.status(404).json({ error: "Event not found"})
-    }
-
-    next();
-  } catch (err) {
-    next(err);
+  if (!exists) {
+    res.status(404);
+    throw new Error("Event not found");
   }
+
+  next()
 })
 router.param('student_number', async (req, res, next) => {
   const student_number = req.params.student_number; 
@@ -56,21 +54,18 @@ router.param('student_number', async (req, res, next) => {
   const parsed = studentNumberSchema.safeParse(student_number);
 
   if (!parsed.success) { 
-    next(parsed.error);
-    return;
+    res.status(400);
+    throw parsed.error
   }
 
-  try {
-    const exists = await studentNumberExists(parsed.data);
+  const exists = await studentNumberExists(parsed.data);
 
-    if (!exists) {
-      return res.status(404).json({ error: "Student not found"})
-    }
-
-    next();
-  } catch (err) {
-    next(err);
+  if (!exists) {
+    res.status(404);
+    throw new Error("Student not found");
   }
+
+  next()
 })
 router.param('id', async (req, res, next) => {
   const attendee_id = req.params.id; 
@@ -79,21 +74,18 @@ router.param('id', async (req, res, next) => {
   const parsed = idSchema.safeParse(attendee_id);
 
   if (!parsed.success) { 
-    next(parsed.error);
-    return;
+    res.status(400);
+    throw parsed.error
   }
 
-  try {
-    const exists = await attendeeIdExists(parsed.data);
+  const exists = await attendeeIdExists(parsed.data);
 
-    if (!exists) {
-      return res.status(404).json({ error: "Attendee not found"})
-    }
+  if (!exists) {
+    res.status(404);
+    throw new Error("Attendee not found")
+  }
 
-    next();
-  } catch (err) {
-    next(err);
-  } 
+  next()
 })
 
 /*
@@ -113,8 +105,7 @@ router.route('/')
 
     if (!parsed.success) { 
       res.status(400);
-      next(parsed.error);
-      return;
+      throw parsed.error
     }
 
     const {page, size} = parsed.data
@@ -163,21 +154,19 @@ router.route('/')
     const parsedResponse = attendeeResponseSchema.safeParse(response);
 
     if (!parsedResponse.success) { 
-      console.error("Internal server error: Response schema validation failed", parsedResponse.error);
-      res.status(500).json({ error: "Internal server error. "})
-      return;
+      res.status(500);
+      throw parsedResponse.error
     }
     
-    res.status(200).json(response)
+    res.status(200).json(response);
   })
   .post(async (req, res, next) => {
     const attendee = req.body;  
 
     const parsed = attendeeCreateSchema.safeParse(attendee);
     if (!parsed.success) { 
-      res.status(400)
-      next(parsed.error);
-      return;
+      res.status(400);
+      throw parsed.error
     }
 
     const { event_id, payment, student_number } = parsed.data
@@ -190,9 +179,8 @@ router.route('/')
     const result = await db.query(insertQuery);
 
     if (!result.rowCount) {
-      console.error("Internal server error: Attendee creation failed");
-      res.status(500).json({ error: "Internal server error. "});
-      return;
+      res.status(500)
+      throw new Error("Internal server error: Attendee creation failed");
     }
 
     const data : AttendeeData[] = result.rows.map((attendee : Attendee) => ({
@@ -207,9 +195,8 @@ router.route('/')
     const parsedData = attendeeDataSchema.safeParse(data[0]);
 
     if (!parsedData.success) { 
-      console.error("Internal server error: Response schema validation failed", parsedData.error);
-      res.status(500).json({ error: "Internal server error. "})
-      return;
+      res.status(500)
+      throw parsedData.error;
     }
 
     res.status(200).json(parsedData.data);
