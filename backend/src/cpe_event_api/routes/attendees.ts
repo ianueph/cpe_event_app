@@ -117,8 +117,7 @@ router.route('/')
       return;
     }
 
-    const page = parsed.data.page;
-    const size = parsed.data.size;
+    const {page, size} = parsed.data
     const offset = getOffset(page, size)
 
     const fetchQuery : QueryConfig = {
@@ -132,19 +131,8 @@ router.route('/')
     const fetchResult = await db.query(fetchQuery);
     const countResult = await db.query(countQuery);
 
-    if (!countResult.rowCount) {
-      res.status(200).json({
-        data: [],
-        meta: [],
-        links: [],
-      })
-      return;
-    }
-
-    const totalEntries = countResult.rowCount;
-    const totalPages =  getTotalPages(totalEntries, size);
-
-    const data : AttendeeData[] = fetchResult.rows.map((attendee : Attendee) => ({
+    const rows = fetchResult.rows as Attendee[]
+    const data : AttendeeData[] = rows.map((attendee) => ({
       ...attendee,
       links: [
         {rel: "self", href: `/attendees/${attendee.id}`},
@@ -152,6 +140,9 @@ router.route('/')
         {rel: "student", href: `/attendees/student_number/${attendee.student_number}`},
       ]
     }));
+
+    const totalEntries = parseInt(countResult.rows[0].count)
+    const totalPages =  getTotalPages(totalEntries, size);
 
     const links : LinkMetadata[] = getPaginationLinks('/attendees/', page, size, totalEntries);
 
