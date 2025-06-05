@@ -5,7 +5,7 @@ export async function handleTransaction(
     queries : QueryConfig[]
 ) : Promise<QueryResult[]> {
     const client = await db.connect()
-    var results : QueryResult[] = []
+    let results : QueryResult[] = [];
 
     if (queries.length === 0) {
         throw new Error ("No queries provided.")
