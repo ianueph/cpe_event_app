@@ -38,7 +38,7 @@ router.param('event_id', async (req, res, next) => {
 })
 
 router.route("/")
-	.get(async (req, res, next) => {
+	.get(async (req, res) => {
 		const pagination = req.query;
 		const parsed = paginationParameterSchema.safeParse(pagination);
 
@@ -97,7 +97,7 @@ router.route("/")
 		
 		res.status(200).json(response);
 	})
-	.post(async (req, res, next) => {
+	.post(async (req, res) => {
 		const event = req.body;  
 
 		const parsed = eventCreateSchema.safeParse(event);
