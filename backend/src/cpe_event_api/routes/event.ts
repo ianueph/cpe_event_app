@@ -133,7 +133,7 @@ router.route("/")
 			throw parsedData.error;
 		}
 
-		res.status(200).json(parsedData.data);
+		res.status(201).json(parsedData.data);
 	})
 
 router.route('/:event_id')
