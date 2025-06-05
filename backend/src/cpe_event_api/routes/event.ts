@@ -1,8 +1,9 @@
 /*
 GET 	/events/:event_id
 GET 	/events/
-POST	/events/
+POST	/events/		  	TODO: Batch
 UPDATE	/events/:event_id
+DELETE	/events/:event_id 	TODO: Batch
 */
 
 import express from "express";
