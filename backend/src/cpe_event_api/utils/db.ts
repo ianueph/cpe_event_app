@@ -20,13 +20,14 @@ export async function getColumns(
 ) : Promise<String[]> {
     const query : QueryConfig = {
         name: "get-column-from-table",
-        text: `SELECT table_name\
+        text: `SELECT column_name\
                 FROM information_schema.columns\
-                WHERE table_name = ${table_name}`
+                WHERE table_name = $1`,
+        values: [table_name]
     }
     const result = await db.query(query)
 
-    const columns = result.rows.map(row => row.table_name)
+    const columns = result.rows.map(row => row.column_name)
 
     return columns
 }
