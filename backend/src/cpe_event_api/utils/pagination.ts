@@ -3,8 +3,8 @@ export function getOffset(
     size : number,
 ) : number {
 
-    if (page < 0) { return 0; }
-    if (size < 0) { return 0; }
+    if (page <= 0) { return 0; }
+    if (size <= 0) { return 0; }
 
     return (page - 1) * size;
 }
@@ -14,8 +14,8 @@ export function getTotalPages(
     size : number,
 ) : number {
 
-    if (totalEntries < 0) { return 0; }
-    if (size < 0) { return 0; }
+    if (totalEntries <= 0) { return 0; }
+    if (size <= 0) { return 0; }
     
     return Math.ceil(totalEntries / size)
 }
