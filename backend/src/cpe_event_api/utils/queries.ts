@@ -3,6 +3,45 @@ import { getColumns } from "./db"
 
 type RowData = {
     [key: string]: any
+} 
+
+export async function buildPaginatedSelectAllQuery(
+    table : string,
+    id_column : string,
+    size : number,
+    offset : number,
+    order? : string
+) : Promise<QueryConfig> {
+
+    if (!order) {
+        order = "ASC"
+    }
+
+    if (!table) {
+        throw Error("Invalid table name")
+    }
+
+    const query : QueryConfig = {
+        text: `SELECT * FROM ${table} ORDER BY ${id_column} ${order} LIMIT $1 OFFSET $2`,
+        values: [size, offset]
+    }
+
+    return query;
+}
+
+export async function buildCountQuery(
+    table : string
+) : Promise<QueryConfig> {
+
+    if (!table) {
+        throw Error("Invalid table name")
+    }
+
+    const query : QueryConfig = {
+        text: `SELECT COUNT(*) FROM ${table}`
+    }
+
+    return query
 }
 
 export async function buildInsertQuery(

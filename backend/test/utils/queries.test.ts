@@ -1,4 +1,46 @@
-import { buildInsertQuery, buildUpdateQuery } from '../../src/cpe_event_api/utils/queries';
+import { buildPaginatedSelectAllQuery, buildCountQuery, buildInsertQuery, buildUpdateQuery } from '../../src/cpe_event_api/utils/queries';
+
+describe('buildPaginatedSelectAllQuery', () => {
+  it('should create a valid SELECT * query', async () => {
+    const query = await buildPaginatedSelectAllQuery(
+      'events',   // table name
+      'event_id', // id
+      5,          // size
+      10,         // offset
+      'DESC',     // order
+    );
+
+    expect(query).toEqual({
+			text: "SELECT * FROM events ORDER BY event_id DESC LIMIT $1 OFFSET $2",
+			values: [5, 10]
+		})
+  }),
+
+  it('should default to ASC if no order is specified', async () => {
+    const query = await buildPaginatedSelectAllQuery('events', 'event_id', 5, 0);
+    expect(query.text).toBe("SELECT * FROM events ORDER BY event_id ASC LIMIT $1 OFFSET $2");
+  }),
+
+  it('should throw an error on invalid table name', async () => {
+    await expect(buildPaginatedSelectAllQuery('', 'id', 5, 0)).rejects.toThrow();
+  })
+})
+
+describe('buildCountQuery', () => {
+  it('should create a valid COUNT(*) query', async () => {
+    const query = await buildCountQuery(
+      'events'
+    );
+
+    expect(query).toEqual({
+			text: "SELECT COUNT(*) FROM events"
+		})
+  }),
+
+  it('should throw an error on invalid table name', async () => {
+    await expect(buildCountQuery('')).rejects.toThrow();
+  })
+})
 
 describe('buildUpdateQuery', () => {
   it('should generate a valid update query and values array', async () => {
