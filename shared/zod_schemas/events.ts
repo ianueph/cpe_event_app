@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 import dayjs from "dayjs";
-import { apiResponseSchema, linkMetadataSchema } from "./metadata";
+import { apiResponseSchema, idSchema, linkMetadataSchema } from "./metadata";
 
 export type Event = z.infer<typeof eventSchema>
 export type EventCreate = z.infer<typeof eventCreateSchema>
@@ -17,11 +17,7 @@ export const eventEnum = z.enum([
 ])
 
 export const eventSchema = z.object({
-    id: z
-    .coerce
-    .number()
-    .int()
-    .nonnegative(),
+    id: idSchema,
 
     event_name: z
     .coerce

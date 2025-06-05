@@ -1,5 +1,5 @@
 import { z } from "zod/v4";
-import { apiResponseSchema, linkMetadataSchema } from "./metadata";
+import { apiResponseSchema, idSchema, linkMetadataSchema } from "./metadata";
 
 export type ProgramTypes = z.infer<typeof programEnum>
 export type YearLevelTypes = z.infer<typeof yearLevelEnum>
@@ -23,11 +23,7 @@ export const yearLevelEnum = z.enum([
 ])
 
 export const studentSchema = z.object({
-    id: z
-    .coerce
-    .number()
-    .int()
-    .nonnegative(),
+    id: idSchema,
 
     first_name: z
     .coerce

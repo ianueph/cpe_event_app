@@ -1,8 +1,15 @@
 import { z } from "zod/v4";
 
+export type Id = z.infer<typeof idSchema>;
 export type PaginationParameter = z.infer<typeof paginationParameterSchema>;
 export type PaginationMetadata = z.infer<typeof paginationMetadataSchema>;
 export type LinkMetadata = z.infer<typeof linkMetadataSchema>;
+
+export const idSchema = z
+    .coerce
+    .number()
+    .int()
+    .nonnegative()
 
 export const linkMetadataSchema = z.object({
     rel: z

@@ -1,5 +1,5 @@
 import { z } from "zod/v4";
-import { apiResponseSchema, linkMetadataSchema } from "./metadata";
+import { apiResponseSchema, idSchema, linkMetadataSchema } from "./metadata";
 
 export type Attendee = z.infer<typeof attendeeSchema>
 export type AttendeeCreate = z.infer<typeof attendeeCreateSchema>
@@ -8,11 +8,7 @@ export type AttendeeData = z.infer<typeof attendeeDataSchema>
 export type AttendeeResponse = z.infer<typeof attendeeResponseSchema>
 
 export const attendeeSchema = z.object({
-    id: z
-    .coerce
-    .number()
-    .int()
-    .nonnegative(),
+    id: idSchema,
 
     student_number: z
     .coerce
