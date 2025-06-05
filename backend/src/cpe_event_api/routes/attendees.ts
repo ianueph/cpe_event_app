@@ -21,6 +21,7 @@ import { Query, QueryConfig } from 'pg';
 import { getOffset, getTotalPages } from '../utils/pagination';
 import { getPaginationLinks } from '../utils/links';
 import { z } from 'zod';
+import { validatePagination } from '../utils/validation';
 
 require('express-async-errors');
 const router = express.Router();
@@ -100,16 +101,9 @@ router.get("/student/:student_number", (req, res) => {
   // return all attended events by student_number, paginated
 });
 router.route('/')
-  .get(async (req, res, next) => {
-    const pagination = req.query;
-    const parsed = paginationParameterSchema.safeParse(pagination);
-
-    if (!parsed.success) { 
-      res.status(400);
-      throw parsed.error
-    }
-
-    const {page, size} = parsed.data
+  .get(async (req, res) => {
+    const pagination = validatePagination(req.query)
+    const {page, size} = pagination
     const offset = getOffset(page, size)
 
     const fetchQuery : QueryConfig = {

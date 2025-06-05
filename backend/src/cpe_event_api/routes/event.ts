@@ -17,6 +17,7 @@ import { getPaginationLinks } from "../utils/links";
 import { getColumns } from "../utils/db";
 import { buildCountQuery, buildInsertQuery, buildPaginatedSelectAllQuery, buildUpdateQuery } from "../utils/queries";
 import { handleTransaction } from "../handlers/transactions";
+import { validatePagination } from "../utils/validation";
 
 require('express-async-errors');
 const router = express.Router()
@@ -43,15 +44,8 @@ router.param('event_id', async (req, res, next) => {
 
 router.route("/")
 	.get(async (req, res) => {
-		const pagination = req.query;
-		const parsed = paginationParameterSchema.safeParse(pagination);
-
-		if (!parsed.success) { 
-			res.status(400);
-			throw parsed.error;
-		}
-
-		const {page, size} = parsed.data
+		const pagination = validatePagination(req.query)
+		const {page, size} = pagination
 		const offset = getOffset(page, size)
 
 		const [fetchResult, countResult] = await handleTransaction([
