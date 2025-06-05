@@ -15,7 +15,7 @@ import { LinkMetadata, paginationParameterSchema } from "../../../../shared/zod_
 import { getOffset, getTotalPages } from "../utils/pagination";
 import { getPaginationLinks } from "../utils/links";
 import { getColumns } from "../utils/db";
-import { buildUpdateQuery } from "../utils/queries";
+import { buildInsertQuery, buildUpdateQuery } from "../utils/queries";
 
 require('express-async-errors');
 const router = express.Router()
@@ -109,39 +109,7 @@ router.route("/")
 			throw parsed.error;
 		}
 
-		const {
-			event_name,
-			event_description,
-			event_type,
-			date,
-			start_time,
-			end_time,
-			registration_fee,
-			oic
-		} = parsed.data;
-
-		const insertQuery : QueryConfig = {
-			text: "INSERT INTO events(\
-				event_name,\
-				event_description,\
-				event_type,\
-				date,\
-				start_time,\
-				end_time,\
-				registration_fee,\
-				oic\
-				) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
-			values: [
-				event_name,
-				event_description,
-				event_type,
-				date,
-				start_time,
-				end_time,
-				registration_fee,
-				oic
-			]
-		}
+		const insertQuery : QueryConfig = await buildInsertQuery('events', parsed.data)
 
 		const result = await db.query(insertQuery);
 
