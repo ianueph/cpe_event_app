@@ -1,4 +1,4 @@
-import { buildUpdateQuery } from '../../src/cpe_event_api/utils/queries';
+import { buildInsertQuery, buildUpdateQuery } from '../../src/cpe_event_api/utils/queries';
 
 describe('buildUpdateQuery', () => {
   it('should generate a valid update query and values array', async () => {
@@ -23,5 +23,37 @@ describe('buildUpdateQuery', () => {
     await expect(
       buildUpdateQuery('events', 'event_id', 123, {})
     ).rejects.toThrow('No fields to update');
+  });
+});
+
+describe("buildInsertQuery", () => {
+  it("builds a correct INSERT query", async () => {
+    const data = {
+      event_name: "Hackathon",
+      event_description: "24hr coding",
+      event_type: "Conference",
+      date: "2025-07-01",
+      start_time: "10:00",
+      end_time: "18:00",
+      registration_fee: 100,
+      oic: "John Doe"
+    };
+
+    const query = await buildInsertQuery("events", data);
+
+    expect(query.text).toBe(
+      "INSERT INTO events(event_name, event_description, event_type, date, start_time, end_time, registration_fee, oic) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *"
+    );
+
+    expect(query.values).toEqual([
+      "Hackathon",
+      "24hr coding",
+      "Conference",
+      "2025-07-01",
+      "10:00",
+      "18:00",
+      100,
+      "John Doe"
+    ]);
   });
 });

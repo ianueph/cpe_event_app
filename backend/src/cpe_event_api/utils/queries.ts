@@ -5,8 +5,23 @@ type RowData = {
     [key: string]: any
 }
 
-export async function buildCreateQuery() {
+export async function buildInsertQuery(
+    table: string,
+    data: RowData
+) : Promise<QueryConfig> {
+    const columns = Object.keys(data)
+    if (columns.length === 0) {
+        throw new Error("No data to create")
+    }
+    const values = Object.values(data);
+    const placeholders = columns.map((column, i) => `$${i+1}`).join(", ")
 
+    const query : QueryConfig = {
+        text: `INSERT INTO ${table}(${columns.join(", ")}) VALUES(${placeholders}) RETURNING *`,
+        values: values
+    }
+
+    return query
 }
 
 export async function buildUpdateQuery(
