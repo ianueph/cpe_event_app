@@ -3,7 +3,7 @@ import db from "../db"
 export async function eventIdExists(id : number) : Promise<boolean> {
     const result = await db.query({
         name: 'check-event-exists',
-        text: 'SELECT 1 FROM events WHERE id = $1',
+        text: 'SELECT 1 FROM events WHERE event_id = $1',
         values: [id]
     })
 
