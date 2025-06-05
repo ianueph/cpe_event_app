@@ -62,7 +62,7 @@ ALTER SEQUENCE public.attendees_id_seq OWNED BY public.attendees.id;
 --
 
 CREATE TABLE public.events (
-    event_id integer NOT NULL,
+    id integer NOT NULL,
     event_name character varying(128),
     event_description text,
     event_type character varying(64),
@@ -77,10 +77,10 @@ CREATE TABLE public.events (
 ALTER TABLE public.events OWNER TO postgres;
 
 --
--- Name: events_event_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: events_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public.events_event_id_seq
+CREATE SEQUENCE public.events_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -89,13 +89,13 @@ CREATE SEQUENCE public.events_event_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.events_event_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.events_id_seq OWNER TO postgres;
 
 --
--- Name: events_event_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.events_event_id_seq OWNED BY public.events.event_id;
+ALTER SEQUENCE public.events_id_seq OWNED BY public.events.id;
 
 
 --
@@ -147,10 +147,10 @@ ALTER TABLE ONLY public.attendees ALTER COLUMN id SET DEFAULT nextval('public.at
 
 
 --
--- Name: events event_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: events id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.events ALTER COLUMN event_id SET DEFAULT nextval('public.events_event_id_seq'::regclass);
+ALTER TABLE ONLY public.events ALTER COLUMN id SET DEFAULT nextval('public.events_id_seq'::regclass);
 
 
 --
@@ -173,7 +173,7 @@ ALTER TABLE ONLY public.attendees
 --
 
 ALTER TABLE ONLY public.events
-    ADD CONSTRAINT events_pkey PRIMARY KEY (event_id);
+    ADD CONSTRAINT events_pkey PRIMARY KEY (id);
 
 
 --
@@ -193,11 +193,11 @@ ALTER TABLE ONLY public.students
 
 
 --
--- Name: attendees event_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: attendees id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.attendees
-    ADD CONSTRAINT event_id_fk FOREIGN KEY (event_id) REFERENCES public.events(event_id) MATCH FULL;
+    ADD CONSTRAINT event_id_fk FOREIGN KEY (event_id) REFERENCES public.events(id) MATCH FULL;
 
 
 --

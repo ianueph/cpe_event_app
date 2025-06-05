@@ -1,9 +1,9 @@
 /*
-GET 	/events/:event_id
+GET 	/events/:id
 GET 	/events/
 POST	/events/		  	TODO: Batch
-UPDATE	/events/:event_id
-DELETE	/events/:event_id 	TODO: Batch
+UPDATE	/events/:id
+DELETE	/events/:id 	TODO: Batch
 */
 
 import express from "express";
@@ -22,11 +22,11 @@ import { validatePagination } from "../utils/validation";
 require('express-async-errors');
 const router = express.Router()
 
-router.param('event_id', async (req, res, next) => {
-  const event_id = req.params.event_id; 
+router.param('id', async (req, res, next) => {
+  const id = req.params.id; 
   
-  const idSchema = eventSchema.shape.event_id;
-  const parsed = idSchema.safeParse(event_id);
+  const idSchema = eventSchema.shape.id;
+  const parsed = idSchema.safeParse(id);
 
   if (!parsed.success) { 
     throw parsed.error;
@@ -49,7 +49,7 @@ router.route("/")
 		const offset = getOffset(page, size)
 
 		const [fetchResult, countResult] = await handleTransaction([
-			await buildPaginatedSelectAllQuery('events', 'event_id', size, offset),
+			await buildPaginatedSelectAllQuery('events', 'id', size, offset),
 			await buildCountQuery('events')
 		])
 
@@ -57,7 +57,7 @@ router.route("/")
 		const data : EventData[] = rows.map((event) => ({
 			...event,
 			links: [
-				{rel: "self", href: `/events/${event.event_id}`},
+				{rel: "self", href: `/events/${event.id}`},
 			]
 		}));
 
@@ -111,7 +111,7 @@ router.route("/")
 		const data : EventData[] = rows.map((event) => ({
 			...event,
 			links: [
-				{rel: "self", href: `/events/${event.event_id}`}
+				{rel: "self", href: `/events/${event.id}`}
 			]
 		}));
 
@@ -125,13 +125,13 @@ router.route("/")
 		res.status(201).json(parsedData.data);
 	})
 
-router.route('/:event_id')
+router.route('/:id')
 	.get(async (req, res) => {
-		const event_id = req.params.event_id
+		const id = req.params.id
 
 		const query : QueryConfig = {
-			text: "SELECT * FROM events WHERE event_id = $1",
-			values: [event_id]
+			text: "SELECT * FROM events WHERE id = $1",
+			values: [id]
 		}
 
 		const result = await db.query(query);
@@ -140,7 +140,7 @@ router.route('/:event_id')
 		const data : EventData[] = rows.map((event) => ({
 			...event,
 			links: [
-				{rel: "self", href: `/events/${event.event_id}`}
+				{rel: "self", href: `/events/${event.id}`}
 			]
 		}));
 
@@ -154,8 +154,8 @@ router.route('/:event_id')
 		res.status(200).json(parsedData.data);
 	})
 	.put(async (req, res) => {
-		const event_id = parseInt(req.params.event_id)
-		req.body.event_id = event_id
+		const id = parseInt(req.params.id)
+		req.body.id = id
 
 		const parsed = eventUpdateSchema.safeParse(req.body);
 		if (!parsed.success) { 
@@ -163,7 +163,7 @@ router.route('/:event_id')
 			throw parsed.error;
 		}
 
-		const query : QueryConfig = await buildUpdateQuery('events', 'event_id', event_id, parsed.data)
+		const query : QueryConfig = await buildUpdateQuery('events', 'id', id, parsed.data)
 
 		const result = await db.query(query);
 
@@ -171,7 +171,7 @@ router.route('/:event_id')
 		const data : EventData[] = rows.map((event) => ({
 			...event,
 			links: [
-				{rel: "self", href: `/events/${event.event_id}`}
+				{rel: "self", href: `/events/${event.id}`}
 			]
 		}));
 
@@ -185,11 +185,11 @@ router.route('/:event_id')
 		res.status(200).json(parsedData.data);
 	})
 	.delete(async (req, res) => {
-		const event_id = req.params.event_id;
+		const id = req.params.id;
 
 		const query : QueryConfig = {
-			text: "DELETE from events WHERE event_id = $1 RETURNING *",
-			values: [event_id]
+			text: "DELETE from events WHERE id = $1 RETURNING *",
+			values: [id]
 		}
 
 		const result = await db.query(query);

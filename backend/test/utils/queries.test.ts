@@ -4,21 +4,21 @@ describe('buildPaginatedSelectAllQuery', () => {
   it('should create a valid SELECT * query', async () => {
     const query = await buildPaginatedSelectAllQuery(
       'events',   // table name
-      'event_id', // id
+      'id', // id
       5,          // size
       10,         // offset
       'DESC',     // order
     );
 
     expect(query).toEqual({
-			text: "SELECT * FROM events ORDER BY event_id DESC LIMIT $1 OFFSET $2",
+			text: "SELECT * FROM events ORDER BY id DESC LIMIT $1 OFFSET $2",
 			values: [5, 10]
 		})
   }),
 
   it('should default to ASC if no order is specified', async () => {
-    const query = await buildPaginatedSelectAllQuery('events', 'event_id', 5, 0);
-    expect(query.text).toBe("SELECT * FROM events ORDER BY event_id ASC LIMIT $1 OFFSET $2");
+    const query = await buildPaginatedSelectAllQuery('events', 'id', 5, 0);
+    expect(query.text).toBe("SELECT * FROM events ORDER BY id ASC LIMIT $1 OFFSET $2");
   }),
 
   it('should throw an error on invalid table name', async () => {
@@ -46,7 +46,7 @@ describe('buildUpdateQuery', () => {
   it('should generate a valid update query and values array', async () => {
     const query = await buildUpdateQuery(
       'events',
-      'event_id',
+      'id',
       123,
       {
         event_name: 'New Event',
@@ -56,14 +56,14 @@ describe('buildUpdateQuery', () => {
     );
 
     expect(query).toEqual({
-      text: 'UPDATE events SET event_name = $1, event_description = $2, registration_fee = $3 WHERE event_id = $4 RETURNING *',
+      text: 'UPDATE events SET event_name = $1, event_description = $2, registration_fee = $3 WHERE id = $4 RETURNING *',
       values: ['New Event', 'Updated Description', 50, 123]
     });
   });
 
   it('should throw an error if no fields to update', async () => {
     await expect(
-      buildUpdateQuery('events', 'event_id', 123, {})
+      buildUpdateQuery('events', 'id', 123, {})
     ).rejects.toThrow('No fields to update');
   });
 });

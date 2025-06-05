@@ -17,7 +17,7 @@ export const eventEnum = z.enum([
 ])
 
 export const eventSchema = z.object({
-    event_id: z
+    id: z
     .coerce
     .number()
     .int()
@@ -75,7 +75,7 @@ export const eventSchema = z.object({
 )
 
 export const eventCreateSchema = eventSchema.omit({
-    event_id: true
+    id: true
 })
 
 export const eventUpdateSchema = eventSchema.partial({

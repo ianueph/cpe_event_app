@@ -30,10 +30,10 @@ const router = express.Router();
 Parameter validation
 */
 router.param('event_id', async (req, res, next) => {
-  const event_id = req.params.event_id; 
+  const id = req.params.id; 
   
-  const idSchema = attendeeSchema.shape.event_id;
-  const parsed = idSchema.safeParse(event_id);
+  const idSchema = attendeeSchema.shape.id;
+  const parsed = idSchema.safeParse(id);
 
   if (!parsed.success) { 
     res.status(400);
