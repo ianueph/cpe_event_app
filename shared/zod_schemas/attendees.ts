@@ -32,6 +32,10 @@ export const attendeeCreateSchema = attendeeSchema.omit({
     id: true
 })
 
+export const attendeeUpdateSchema = attendeeSchema.partial({
+    payment: true
+})
+
 export const attendeeDataSchema = attendeeSchema.extend({
     links: linkMetadataSchema.array()
 })

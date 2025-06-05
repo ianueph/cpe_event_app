@@ -65,6 +65,21 @@ export const studentSchema = z.object({
     .nonempty()
 })
 
+export const studentCreateSchema = studentSchema.omit({
+    id: true
+})
+
+export const studentUpdateSchema = studentSchema.partial({
+    first_name: true,
+    last_name: true,
+    middle_initial: true,
+    program: true,
+    current_year: true,
+    ue_email: true,
+    contact_number: true,
+    student_number: true,
+})
+
 export const studentDataSchema = studentSchema.extend({
     links: linkMetadataSchema.array()
 })

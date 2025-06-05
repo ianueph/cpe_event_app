@@ -75,6 +75,16 @@ export const eventCreateSchema = eventSchema.omit({
     event_id: true
 })
 
+export const eventUpdateSchema = eventSchema.partial({
+    event_name: true,
+    event_type: true,
+    date: true,
+    start_time: true,
+    end_time: true,
+    registration_fee: true,
+    oic: true
+})
+
 export const eventDataSchema = eventSchema.extend({
     links: linkMetadataSchema.array()
 })
