@@ -7,6 +7,10 @@ export async function handleTransaction(
     const client = await db.connect()
     var results : QueryResult[] = []
 
+    if (queries.length === 0) {
+        throw new Error ("No queries provided.")
+    }
+
     try {
         await client.query("BEGIN");
         for (let i = 0; i < queries.length; i++) {
