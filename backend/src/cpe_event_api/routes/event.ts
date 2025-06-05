@@ -195,8 +195,30 @@ router.route('/:event_id')
 
 		res.status(200).json(parsedData.data);
 	})
-	.delete((req, res) => {
-	// delete an entry
+	.delete(async (req, res) => {
+		const event_id = req.params.event_id;
+
+		const query : QueryConfig = {
+			text: "DELETE from events WHERE event_id = $1 RETURNING *",
+			values: [event_id]
+		}
+
+		const result = await db.query(query);
+
+		const rows = result.rows as Event[];
+		const data : EventData[] = rows.map((event) => ({
+			...event,
+			links: []
+		}));
+
+		const parsedData = eventDataSchema.safeParse(data[0]);
+
+		if (!parsedData.success) { 
+			res.status(500)
+			throw parsedData.error;
+		}
+
+		res.status(200).json(parsedData.data);
 	})
 
 export default router;
