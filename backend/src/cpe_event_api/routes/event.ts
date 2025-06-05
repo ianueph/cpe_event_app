@@ -193,8 +193,36 @@ router.route('/:event_id')
 
 		res.status(200).json(parsedData.data);
 	})
-	.put((req, res) => {
-	// updates an existing entry
+	.put(async (req, res) => {
+		const event_id = parseInt(req.params.event_id)
+		req.body.event_id = event_id
+
+		const parsed = eventUpdateSchema.safeParse(req.body);
+		if (!parsed.success) { 
+			res.status(500)
+			throw parsed.error;
+		}
+
+		const query : QueryConfig = await buildUpdateQuery('events', 'event_id', event_id, parsed.data)
+
+		const result = await db.query(query);
+
+		const rows = result.rows as Event[];
+		const data : EventData[] = rows.map((event) => ({
+			...event,
+			links: [
+				{rel: "self", href: `/events/${event.event_id}`}
+			]
+		}));
+
+		const parsedData = eventDataSchema.safeParse(data[0]);
+
+		if (!parsedData.success) { 
+			res.status(500)
+			throw parsedData.error;
+		}
+
+		res.status(200).json(parsedData.data);
 	})
 	.delete((req, res) => {
 	// delete an entry
