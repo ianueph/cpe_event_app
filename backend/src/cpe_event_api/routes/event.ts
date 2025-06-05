@@ -13,6 +13,8 @@ import db from '../db';
 import { LinkMetadata, paginationParameterSchema } from "../../../../shared/zod_schemas/metadata";
 import { getOffset, getTotalPages } from "../utils/pagination";
 import { getPaginationLinks } from "../utils/links";
+import { getColumns } from "../utils/db";
+import { buildUpdateQuery } from "../utils/queries";
 
 require('express-async-errors');
 const router = express.Router()
