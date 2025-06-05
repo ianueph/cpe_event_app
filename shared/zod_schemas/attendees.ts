@@ -2,6 +2,8 @@ import { z } from "zod/v4";
 import { apiResponseSchema, linkMetadataSchema } from "./metadata";
 
 export type Attendee = z.infer<typeof attendeeSchema>
+export type AttendeeCreate = z.infer<typeof attendeeCreateSchema>
+export type AttendeeUpdate = z.infer<typeof attendeeUpdateSchema>
 export type AttendeeData = z.infer<typeof attendeeDataSchema>
 export type AttendeeResponse = z.infer<typeof attendeeResponseSchema>
 

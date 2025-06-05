@@ -3,8 +3,11 @@ import dayjs from "dayjs";
 import { apiResponseSchema, linkMetadataSchema } from "./metadata";
 
 export type Event = z.infer<typeof eventSchema>
+export type EventCreate = z.infer<typeof eventCreateSchema>
+export type EventUpdate = z.infer<typeof eventUpdateSchema>
 export type EventData = z.infer<typeof eventDataSchema>
 export type EventResponse = z.infer<typeof eventResponseSchema>
+export type EventTypes = z.infer<typeof eventEnum>
 
 export const eventEnum = z.enum([
     "Conference",

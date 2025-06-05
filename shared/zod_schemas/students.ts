@@ -1,8 +1,12 @@
 import { z } from "zod/v4";
 import { apiResponseSchema, linkMetadataSchema } from "./metadata";
 
-export type Student = z.infer<typeof studentSchema>;
-export type studentSchema = z.infer<typeof studentResponseSchema>;
+export type ProgramTypes = z.infer<typeof programEnum>
+export type YearLevelTypes = z.infer<typeof yearLevelEnum>
+export type StudentSchema = z.infer<typeof studentSchema>
+export type StudentCreate = z.infer<typeof studentCreateSchema>
+export type StudentUpdate = z.infer<typeof studentUpdateSchema>
+export type StudentResponse = z.infer<typeof studentResponseSchema>
 
 export const programEnum = z.enum([
     "Mechanical Engineering",
