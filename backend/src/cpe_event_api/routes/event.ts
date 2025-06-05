@@ -170,7 +170,7 @@ router.route('/:event_id')
 		const event_id = req.params.event_id
 
 		const query : QueryConfig = {
-			text: "SELECT 1 FROM events WHERE event_id = $1",
+			text: "SELECT * FROM events WHERE event_id = $1",
 			values: [event_id]
 		}
 
