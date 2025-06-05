@@ -15,7 +15,8 @@ import { LinkMetadata, paginationParameterSchema } from "../../../../shared/zod_
 import { getOffset, getTotalPages } from "../utils/pagination";
 import { getPaginationLinks } from "../utils/links";
 import { getColumns } from "../utils/db";
-import { buildInsertQuery, buildUpdateQuery } from "../utils/queries";
+import { buildCountQuery, buildInsertQuery, buildPaginatedSelectAllQuery, buildUpdateQuery } from "../utils/queries";
+import { handleTransaction } from "../handlers/transactions";
 
 require('express-async-errors');
 const router = express.Router()
@@ -53,16 +54,10 @@ router.route("/")
 		const {page, size} = parsed.data
 		const offset = getOffset(page, size)
 
-		const fetchQuery : QueryConfig = {
-			text: "SELECT * FROM events ORDER BY event_id DESC LIMIT $1 OFFSET $2",
-			values: [size, offset]
-		}
-		const countQuery : QueryConfig = {
-			text: "SELECT COUNT(*) FROM events"
-		}
-
-		const fetchResult = await db.query(fetchQuery);
-		const countResult = await db.query(countQuery);
+		const [fetchResult, countResult] = await handleTransaction([
+			await buildPaginatedSelectAllQuery('events', 'event_id', size, offset),
+			await buildCountQuery('events')
+		])
 
 		const rows = fetchResult.rows as Event[]
 		const data : EventData[] = rows.map((event) => ({
