@@ -7,7 +7,7 @@ DELETE	/events/:event_id 	TODO: Batch
 */
 
 import express from "express";
-import {Event, eventCreateSchema, EventData, eventDataSchema, EventResponse, eventResponseSchema, eventSchema} from "../../../../shared/zod_schemas/events"
+import {Event, eventCreateSchema, EventData, eventDataSchema, EventResponse, eventResponseSchema, eventSchema, eventUpdateSchema} from "../../../../shared/zod_schemas/events"
 import { eventIdExists } from '../handlers/checkers';
 import { QueryConfig } from "pg";
 import db from '../db';
