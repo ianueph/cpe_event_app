@@ -88,4 +88,4 @@ export const eventDataSchema = eventSchema.extend({
     links: linkMetadataSchema.array()
 })
 
-export const eventResponseSchema = apiResponseSchema(eventSchema)
+export const eventResponseSchema = apiResponseSchema(eventDataSchema)
