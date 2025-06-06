@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-
 import ErrorResponse from './interfaces/ErrorResponse';
 import { ZodError } from 'zod/v4';
+import createHttpError from 'http-errors';
 
 export function notFound(req: Request, res: Response, next: NextFunction) {
   res.status(404);
@@ -14,8 +14,16 @@ export function errorHandler(err: Error, req: Request, res: Response<ErrorRespon
   const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
   res.status(statusCode);
 
+  if (createHttpError.isHttpError(err)) {
+    res.status(err.status || 500).json({
+      message: err.message,
+      stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,
+    })
+    return;
+  }
+
   if (err instanceof ZodError) {
-    res.json({
+    res.status(400).json({
       message: err.message,
       issues: err.issues,
     })
@@ -24,6 +32,6 @@ export function errorHandler(err: Error, req: Request, res: Response<ErrorRespon
 
   res.json({
     message: err.message,
-    stack: process.env.NODE_ENV === 'production' ? '🥞' : err.stack,
+    stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,
   });
 }
