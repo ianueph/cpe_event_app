@@ -11,7 +11,7 @@ DELETE  /attendees/:id
 import express from 'express';
 import db from "../db";
 import { Attendee, attendeeCreateSchema, AttendeeData, attendeeDataSchema, AttendeeResponse, attendeeResponseSchema, attendeeSchema } from "../../../../shared/zod_schemas/attendees"
-import { LinkMetadata, paginationParameterSchema } from "../../../../shared/zod_schemas/metadata"
+import { idSchema, LinkMetadata, paginationParameterSchema } from "../../../../shared/zod_schemas/metadata"
 import { 
   eventIdExists, 
   studentNumberExists, 
@@ -21,7 +21,8 @@ import { Query, QueryConfig } from 'pg';
 import { getOffset, getTotalPages } from '../utils/pagination';
 import { getPaginationLinks } from '../utils/links';
 import { z } from 'zod';
-import { validatePagination } from '../utils/validation';
+import { validateId, validatePagination } from '../utils/validation';
+import createHttpError from 'http-errors';
 
 require('express-async-errors');
 const router = express.Router();
@@ -30,24 +31,16 @@ const router = express.Router();
 Parameter validation
 */
 router.param('event_id', async (req, res, next) => {
-  const id = req.params.id; 
+  const id = validateId(req.params.event_id)
   
-  const idSchema = attendeeSchema.shape.id;
-  const parsed = idSchema.safeParse(id);
-
-  if (!parsed.success) { 
-    res.status(400);
-    throw parsed.error
-  }
-
-  const exists = await eventIdExists(parsed.data);
+  const exists = await eventIdExists(id);
 
   if (!exists) {
     res.status(404);
-    throw new Error("Event not found");
-  }
+    throw Error("Event not found.");
+  }	
 
-  next()
+  next();
 })
 router.param('student_number', async (req, res, next) => {
   const student_number = req.params.student_number; 

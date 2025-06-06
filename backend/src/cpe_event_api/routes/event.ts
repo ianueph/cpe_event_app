@@ -11,35 +11,28 @@ import {Event, eventCreateSchema, EventData, eventDataSchema, EventResponse, eve
 import { eventIdExists } from '../handlers/checkers';
 import { QueryConfig } from "pg";
 import db from '../db';
-import { LinkMetadata, paginationParameterSchema } from "../../../../shared/zod_schemas/metadata";
+import { idSchema, LinkMetadata, paginationParameterSchema } from "../../../../shared/zod_schemas/metadata";
 import { getOffset, getTotalPages } from "../utils/pagination";
 import { getPaginationLinks } from "../utils/links";
 import { getColumns } from "../utils/db";
 import { buildCountQuery, buildInsertQuery, buildPaginatedSelectAllQuery, buildUpdateQuery } from "../utils/queries";
 import { handleTransaction } from "../handlers/transactions";
-import { validatePagination } from "../utils/validation";
+import { validateId, validatePagination } from "../utils/validation";
 
 require('express-async-errors');
 const router = express.Router()
 
 router.param('id', async (req, res, next) => {
-  const id = req.params.id; 
-  
-  const idSchema = eventSchema.shape.id;
-  const parsed = idSchema.safeParse(id);
+	const id = validateId(req.params.id)
 
-  if (!parsed.success) { 
-    throw parsed.error;
-  }
-
-  const exists = await eventIdExists(parsed.data);
+	const exists = await eventIdExists(id);
 
 	if (!exists) {
 		res.status(404);
 		throw Error("Event not found.");
 	}	
 
-  next();
+	next();
 })
 
 router.route("/")
