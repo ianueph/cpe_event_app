@@ -17,7 +17,7 @@ import { getPaginationLinks } from "../utils/links";
 import { getColumns } from "../utils/db";
 import { buildCountQuery, buildInsertQuery, buildPaginatedSelectAllQuery, buildUpdateQuery } from "../utils/queries";
 import { handleTransaction } from "../handlers/transactions";
-import { validateId, validatePagination } from "../utils/validation";
+import { validateId, validatePagination, validateResponse } from "../utils/validation";
 
 require('express-async-errors');
 const router = express.Router()
@@ -73,14 +73,9 @@ router.route("/")
 			links: links
 		}
 
-		const parsedResponse = eventResponseSchema.safeParse(response);
-
-		if (!parsedResponse.success) { 
-			res.status(500);
-			throw parsedResponse.error;
-		}
+		const parsedResponse = validateResponse(response, eventResponseSchema)
 		
-		res.status(200).json(response);
+		res.status(200).json(parsedResponse);
 	})
 	.post(async (req, res) => {
 		const event = req.body;  

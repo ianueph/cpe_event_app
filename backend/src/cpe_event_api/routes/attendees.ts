@@ -21,7 +21,7 @@ import { Query, QueryConfig } from 'pg';
 import { getOffset, getTotalPages } from '../utils/pagination';
 import { getPaginationLinks } from '../utils/links';
 import { z } from 'zod';
-import { validateId, validatePagination } from '../utils/validation';
+import { validateId, validatePagination, validateResponse } from '../utils/validation';
 import createHttpError from 'http-errors';
 
 require('express-async-errors');
@@ -139,14 +139,9 @@ router.route('/')
       links: links
     }
 
-    const parsedResponse = attendeeResponseSchema.safeParse(response);
-
-    if (!parsedResponse.success) { 
-      res.status(500);
-      throw parsedResponse.error
-    }
+    const parsedResponse = validateResponse(response, attendeeResponseSchema)
     
-    res.status(200).json(response);
+    res.status(200).json(parsedResponse);
   })
   .post(async (req, res, next) => {
     const attendee = req.body;  

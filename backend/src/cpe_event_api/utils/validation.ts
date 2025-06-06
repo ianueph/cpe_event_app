@@ -26,3 +26,10 @@ export function validateId(
 ) : Id {
     return validate(id, idSchema);
 }
+
+export function validateResponse<T extends z.ZodType>(
+    response: unknown,
+    schema: ReturnType<typeof apiResponseSchema<T>>
+) : z.infer<typeof schema> {
+    return validate(response, schema);
+}
