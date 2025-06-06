@@ -1,29 +1,28 @@
 import createHttpError from "http-errors";
-import { Id, idSchema, PaginationParameter, paginationParameterSchema } from "../../../../shared/zod_schemas/metadata";
-import { z } from "zod/v4";
+import { Id, idSchema, PaginationParameter, paginationParameterSchema, apiResponseSchema } from "../../../../shared/zod_schemas/metadata";
+import { z, ZodType } from "zod/v4";
+
+export function validate<T, S extends ZodType<T>>(
+    input : unknown,
+    schema : S
+) : z.infer<S> {
+    const parsed = schema.safeParse(input);
+
+    if (!parsed.success) {
+        throw new createHttpError.BadRequest(z.prettifyError(parsed.error))
+    }
+
+    return parsed.data;
+}
 
 export function validatePagination(
     pagination: any
 ) : PaginationParameter {
-    const parsed = paginationParameterSchema.safeParse(pagination)
-
-    if (!parsed.success) {
-        throw createHttpError.BadRequest(z.prettifyError(parsed.error))
-    }
-
-    const result : PaginationParameter = parsed.data
-    return result;
+    return validate(pagination, paginationParameterSchema)
 }
 
 export function validateId(
     id: string | number
 ) : Id {
-    const parsed = idSchema.safeParse(id)
-
-    if(!parsed.success) {
-        throw createHttpError.BadRequest(z.prettifyError(parsed.error))
-    }
-
-    const result : Id = parsed.data;
-    return result;
+    return validate(id, idSchema);
 }
