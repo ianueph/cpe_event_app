@@ -86,3 +86,15 @@ export async function buildUpdateQuery(
 
     return query;
 }
+
+export async function buildDeleteQuery(
+    table: string,
+    id : number
+) : Promise<QueryConfig> {
+    const query : QueryConfig = {
+        text: `DELETE from ${table} WHERE id = $1 RETURNING *`,
+        values: [id]
+    }
+
+    return query;
+}

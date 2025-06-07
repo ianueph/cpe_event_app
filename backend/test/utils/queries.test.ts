@@ -1,4 +1,4 @@
-import { buildPaginatedSelectAllQuery, buildCountQuery, buildInsertQuery, buildUpdateQuery } from '../../src/cpe_event_api/utils/queries';
+import { buildPaginatedSelectAllQuery, buildCountQuery, buildInsertQuery, buildUpdateQuery, buildDeleteQuery } from '../../src/cpe_event_api/utils/queries';
 
 describe('buildPaginatedSelectAllQuery', () => {
   it('should create a valid SELECT * query', async () => {
@@ -97,5 +97,19 @@ describe("buildInsertQuery", () => {
       100,
       "John Doe"
     ]);
+  });
+});
+
+describe("buildDeleteQuery", () => {
+  it("builds a correct DELETE query", async () => {
+    const id = 5
+
+    const query = await buildDeleteQuery("events", id);
+
+    expect(query.text).toBe(
+      "DELETE from events WHERE id = $1 RETURNING *"
+    );
+
+    expect(query.values).toEqual([5]);
   });
 });
