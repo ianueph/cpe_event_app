@@ -1,5 +1,6 @@
 import { z } from "zod/v4";
 import { apiResponseSchema, idSchema, linkMetadataSchema } from "./metadata";
+import { createCreateSchema, createDataSchema, createUpdateSchema } from "./crud";
 
 export type Attendee = z.infer<typeof attendeeSchema>
 export type AttendeeCreate = z.infer<typeof attendeeCreateSchema>
@@ -26,16 +27,7 @@ export const attendeeSchema = z.object({
     .nonnegative(),
 })
 
-export const attendeeCreateSchema = attendeeSchema.omit({
-    id: true
-})
-
-export const attendeeUpdateSchema = attendeeSchema.partial({
-    payment: true
-})
-
-export const attendeeDataSchema = attendeeSchema.extend({
-    links: linkMetadataSchema.array()
-})
-
+export const attendeeCreateSchema = createCreateSchema(attendeeSchema)
+export const attendeeUpdateSchema = createUpdateSchema(attendeeSchema)
+export const attendeeDataSchema = createDataSchema(attendeeSchema)
 export const attendeeResponseSchema = apiResponseSchema(attendeeDataSchema)

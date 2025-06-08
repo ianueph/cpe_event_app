@@ -1,5 +1,6 @@
 import { z } from "zod/v4";
 import { apiResponseSchema, idSchema, linkMetadataSchema } from "./metadata";
+import { createCreateSchema, createDataSchema, createUpdateSchema } from "./crud";
 
 export type ProgramTypes = z.infer<typeof programEnum>
 export type YearLevelTypes = z.infer<typeof yearLevelEnum>
@@ -65,23 +66,7 @@ export const studentSchema = z.object({
     .nonempty()
 })
 
-export const studentCreateSchema = studentSchema.omit({
-    id: true
-})
-
-export const studentUpdateSchema = studentSchema.partial({
-    first_name: true,
-    last_name: true,
-    middle_initial: true,
-    program: true,
-    current_year: true,
-    ue_email: true,
-    contact_number: true,
-    student_number: true,
-})
-
-export const studentDataSchema = studentSchema.extend({
-    links: linkMetadataSchema.array()
-})
-
+export const studentCreateSchema = createCreateSchema(studentSchema)
+export const studentUpdateSchema = createUpdateSchema(studentSchema)
+export const studentDataSchema = createDataSchema(studentSchema)
 export const studentResponseSchema = apiResponseSchema(studentSchema)

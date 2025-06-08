@@ -1,6 +1,7 @@
 import { z } from "zod/v4";
 import dayjs from "dayjs";
 import { apiResponseSchema, idSchema, linkMetadataSchema } from "./metadata";
+import { createCreateSchema, createDataSchema, createUpdateSchema } from "./crud";
 
 export type Event = z.infer<typeof eventSchema>
 export type EventCreate = z.infer<typeof eventCreateSchema>
@@ -70,22 +71,7 @@ export const eventSchema = z.object({
     }
 )
 
-export const eventCreateSchema = eventSchema.omit({
-    id: true
-})
-
-export const eventUpdateSchema = eventSchema.partial({
-    event_name: true,
-    event_type: true,
-    date: true,
-    start_time: true,
-    end_time: true,
-    registration_fee: true,
-    oic: true
-})
-
-export const eventDataSchema = eventSchema.extend({
-    links: linkMetadataSchema.array()
-})
-
+export const eventCreateSchema = createCreateSchema(eventSchema)
+export const eventUpdateSchema = createUpdateSchema(eventSchema)
+export const eventDataSchema = createDataSchema(eventSchema)
 export const eventResponseSchema = apiResponseSchema(eventDataSchema)
