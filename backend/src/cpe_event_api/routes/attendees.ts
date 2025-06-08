@@ -23,6 +23,7 @@ import { getPaginationLinks } from '../utils/links';
 import { z } from 'zod';
 import { validateId, validatePagination, validateResponse } from '../utils/validation';
 import createHttpError from 'http-errors';
+import { buildInsertQuery } from '../utils/queries';
 
 require('express-async-errors');
 const router = express.Router();
@@ -152,13 +153,7 @@ router.route('/')
       throw parsed.error
     }
 
-    const { event_id, payment, student_number } = parsed.data
-
-    const insertQuery : QueryConfig = {
-      text: "INSERT INTO attendees(event_id, payment, student_number) VALUES($1, $2, $3) RETURNING *",
-      values: [event_id, payment, student_number]
-    }
-
+    const insertQuery : QueryConfig = await buildInsertQuery('attendees', parsed.data)
     const result = await db.query(insertQuery);
 
     if (!result.rowCount) {

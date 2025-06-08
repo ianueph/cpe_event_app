@@ -50,7 +50,7 @@ router.route("/")
 
 		const totalEntries = parseInt(countResult.rows[0].count)
 		const totalPages =  getTotalPages(totalEntries, size);
-		const links : LinkMetadata[] = getPaginationLinks('/events/', page, size, totalEntries);
+		const links = getPaginationLinks('/events/', page, size, totalEntries);
 		const response : EventResponse = {
 			data: data,
 			meta: {
@@ -128,7 +128,7 @@ router.route('/:id')
 		const result = await db.query(query);
 
 		const data = attachLinks(result.rows, (event) => ([
-			{rel: "self", href: `/events/${event.id}`}
+			{rel: "self", href: `/events/${id}`}
 		]))
 
 		const parsedData = eventDataSchema.safeParse(data[0]);
