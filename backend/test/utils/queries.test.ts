@@ -1,4 +1,4 @@
-import { buildPaginatedSelectAllQuery, buildCountQuery, buildInsertQuery, buildUpdateQuery, buildDeleteQuery } from '../../src/cpe_event_api/utils/queries';
+import { buildPaginatedSelectAllQuery, buildCountQuery, buildInsertQuery, buildUpdateQuery, buildDeleteQuery, buildSelectOneQuery } from '../../src/cpe_event_api/utils/queries';
 
 describe('buildPaginatedSelectAllQuery', () => {
   it('should create a valid SELECT * query', async () => {
@@ -24,6 +24,31 @@ describe('buildPaginatedSelectAllQuery', () => {
   it('should throw an error on invalid table name', async () => {
     await expect(buildPaginatedSelectAllQuery('', 'id', 5, 0)).rejects.toThrow();
   })
+})
+
+describe('buildSelectOneQuery', () => {
+  it('should create a valid SELECT * query', async () => {
+    const query = await buildSelectOneQuery(
+      'events',   // table name
+      1, // id
+    );
+
+    expect(query).toEqual({
+			text: "SELECT * FROM events WHERE id = $1",
+			values: [1]
+		})
+  })
+
+  it("throws an error for invalid table name", async () => {
+    await expect(buildSelectOneQuery("", 1)).rejects.toThrow("Invalid table name");
+  });
+
+  it("supports different table names and ids", async () => {
+    const query = await buildSelectOneQuery("users", 99);
+
+    expect(query.text).toBe("SELECT * FROM users WHERE id = $1");
+    expect(query.values).toEqual([99]);
+  });
 })
 
 describe('buildCountQuery', () => {

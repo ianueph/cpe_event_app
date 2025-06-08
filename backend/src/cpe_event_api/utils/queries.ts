@@ -29,6 +29,23 @@ export async function buildPaginatedSelectAllQuery(
     return query;
 }
 
+export async function buildSelectOneQuery(
+    table: string,
+    id: number,
+) : Promise<QueryConfig> {
+
+    if (!table) {
+        throw Error("Invalid table name")
+    }
+
+    const query : QueryConfig = {
+        text: `SELECT * FROM ${table} WHERE id = $1`,
+        values: [id]
+    }
+    
+    return query
+}
+
 export async function buildCountQuery(
     table : string
 ) : Promise<QueryConfig> {

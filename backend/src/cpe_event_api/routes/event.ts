@@ -15,7 +15,7 @@ import { idSchema, LinkMetadata, paginationParameterSchema } from "../../../../s
 import { getOffset, getTotalPages } from "../utils/pagination";
 import { attachLinks, getPaginationLinks } from "../utils/links";
 import { getColumns } from "../utils/db";
-import { buildCountQuery, buildDeleteQuery, buildInsertQuery, buildPaginatedSelectAllQuery, buildUpdateQuery } from "../utils/queries";
+import { buildCountQuery, buildDeleteQuery, buildInsertQuery, buildPaginatedSelectAllQuery, buildSelectOneQuery, buildUpdateQuery } from "../utils/queries";
 import { handleTransaction } from "../handlers/transactions";
 import { validateId, validatePagination, validateResponse } from "../utils/validation";
 
@@ -98,12 +98,9 @@ router.route("/")
 
 router.route('/:id')
 	.get(async (req, res) => {
-		const id = req.params.id
+		const id = parseInt(req.params.id)
 
-		const query : QueryConfig = {
-			text: "SELECT * FROM events WHERE id = $1",
-			values: [id]
-		}
+		const query : QueryConfig = await buildSelectOneQuery('events', id)
 		const result = await db.query(query);
 		const data = attachLinks(result.rows, (event) => ([
 			{rel: "self", href: `/events/${event.id}`}
