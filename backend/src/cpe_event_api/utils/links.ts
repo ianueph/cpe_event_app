@@ -1,4 +1,5 @@
-import { LinkMetadata } from "../../../../shared/zod_schemas/metadata";
+import { z, ZodType } from "zod/v4";
+import { apiResponseSchema, LinkMetadata } from "../../../../shared/zod_schemas/metadata";
 import { getTotalPages } from "./pagination";
 
 export function getPaginationLinks(
@@ -21,4 +22,14 @@ export function getPaginationLinks(
     }
 
     return links;
+}
+
+export function attachLinks<T>(
+  data: T[],
+  linkBuilder: (item: T) => LinkMetadata[]
+) : (T & { links : LinkMetadata[]})[] {
+  return data.map((item) => ({
+    ...item,
+    links: linkBuilder(item)
+  }));
 }

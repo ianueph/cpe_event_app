@@ -87,7 +87,7 @@ export const apiResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
         meta: z.object({
             pagination: paginationMetadataSchema.optional(),
             // something else maybe for v2?
-        }),
+        }).optional(),
         links: linkMetadataSchema.array().optional(),
     });
 

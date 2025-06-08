@@ -13,7 +13,7 @@ import { QueryConfig } from "pg";
 import db from '../db';
 import { idSchema, LinkMetadata, paginationParameterSchema } from "../../../../shared/zod_schemas/metadata";
 import { getOffset, getTotalPages } from "../utils/pagination";
-import { getPaginationLinks } from "../utils/links";
+import { attachLinks, getPaginationLinks } from "../utils/links";
 import { getColumns } from "../utils/db";
 import { buildCountQuery, buildDeleteQuery, buildInsertQuery, buildPaginatedSelectAllQuery, buildUpdateQuery } from "../utils/queries";
 import { handleTransaction } from "../handlers/transactions";
@@ -26,7 +26,6 @@ router.param('id', async (req, res, next) => {
 	const id = validateId(req.params.id)
 
 	const exists = await eventIdExists(id);
-
 	if (!exists) {
 		res.status(404);
 		throw Error("Event not found.");
@@ -40,25 +39,18 @@ router.route("/")
 		const pagination = validatePagination(req.query)
 		const {page, size} = pagination
 		const offset = getOffset(page, size)
-
 		const [fetchResult, countResult] = await handleTransaction([
 			await buildPaginatedSelectAllQuery('events', 'id', size, offset),
 			await buildCountQuery('events')
 		])
 
-		const rows = fetchResult.rows as Event[]
-		const data : EventData[] = rows.map((event) => ({
-			...event,
-			links: [
-				{rel: "self", href: `/events/${event.id}`},
-			]
-		}));
+		const data = attachLinks(fetchResult.rows, (event) => ([
+			{rel: "self", href: `/events/${event.id}`}
+		]))
 
 		const totalEntries = parseInt(countResult.rows[0].count)
 		const totalPages =  getTotalPages(totalEntries, size);
-
 		const links : LinkMetadata[] = getPaginationLinks('/events/', page, size, totalEntries);
-
 		const response : EventResponse = {
 			data: data,
 			meta: {
@@ -72,14 +64,12 @@ router.route("/")
 			},
 			links: links
 		}
-
 		const parsedResponse = validateResponse(response, eventResponseSchema)
 		
 		res.status(200).json(parsedResponse);
 	})
 	.post(async (req, res) => {
 		const event = req.body;  
-
 		const parsed = eventCreateSchema.safeParse(event);
 		if (!parsed.success) { 
 			res.status(400);
@@ -87,24 +77,17 @@ router.route("/")
 		}
 
 		const insertQuery : QueryConfig = await buildInsertQuery('events', parsed.data)
-
 		const result = await db.query(insertQuery);
-
 		if (!result.rowCount) {
 			res.status(500)
 			throw new Error("Internal server error: Event creation failed");
 		}
 
-		const rows = result.rows as Event[];
-		const data : EventData[] = rows.map((event) => ({
-			...event,
-			links: [
-				{rel: "self", href: `/events/${event.id}`}
-			]
-		}));
+		const data = attachLinks(result.rows, (event) => ([
+			{rel: "self", href: `/events/${event.id}`}
+		]))
 
 		const parsedData = eventDataSchema.safeParse(data[0]);
-
 		if (!parsedData.success) { 
 			res.status(500)
 			throw parsedData.error;
@@ -121,19 +104,12 @@ router.route('/:id')
 			text: "SELECT * FROM events WHERE id = $1",
 			values: [id]
 		}
-
 		const result = await db.query(query);
-
-		const rows = result.rows as Event[];
-		const data : EventData[] = rows.map((event) => ({
-			...event,
-			links: [
-				{rel: "self", href: `/events/${event.id}`}
-			]
-		}));
+		const data = attachLinks(result.rows, (event) => ([
+			{rel: "self", href: `/events/${event.id}`}
+		]))
 
 		const parsedData = eventDataSchema.safeParse(data[0]);
-
 		if (!parsedData.success) { 
 			res.status(500)
 			throw parsedData.error;
@@ -152,19 +128,13 @@ router.route('/:id')
 		}
 
 		const query : QueryConfig = await buildUpdateQuery('events', 'id', id, parsed.data)
-
 		const result = await db.query(query);
 
-		const rows = result.rows as Event[];
-		const data : EventData[] = rows.map((event) => ({
-			...event,
-			links: [
-				{rel: "self", href: `/events/${event.id}`}
-			]
-		}));
+		const data = attachLinks(result.rows, (event) => ([
+			{rel: "self", href: `/events/${event.id}`}
+		]))
 
 		const parsedData = eventDataSchema.safeParse(data[0]);
-
 		if (!parsedData.success) { 
 			res.status(500)
 			throw parsedData.error;
@@ -176,17 +146,13 @@ router.route('/:id')
 		const id = parseInt(req.params.id);
 
 		const query = await buildDeleteQuery("events", id)
-
 		const result = await db.query(query);
 
-		const rows = result.rows as Event[];
-		const data : EventData[] = rows.map((event) => ({
-			...event,
-			links: []
-		}));
+		const data = attachLinks(result.rows, (event) => ([
+			{rel: "self", href: `/events/${event.id}`}
+		]))
 
 		const parsedData = eventDataSchema.safeParse(data[0]);
-
 		if (!parsedData.success) { 
 			res.status(500)
 			throw parsedData.error;
