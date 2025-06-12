@@ -7,14 +7,12 @@ DELETE	/events/:id 	TODO: Batch
 */
 
 import express from "express";
-import {Event, EventCreate, eventCreateSchema, EventData, eventDataSchema, EventResponse, eventResponseSchema, eventSchema, eventUpdateSchema} from "../../../../shared/zod_schemas/events"
+import {eventCreateSchema, eventDataSchema, EventResponse, eventResponseSchema, eventUpdateSchema} from "../../../../shared/zod_schemas/events"
 import { eventIdExists } from '../handlers/checkers';
 import { QueryConfig } from "pg";
 import db from '../db';
-import { idSchema, LinkMetadata, paginationParameterSchema } from "../../../../shared/zod_schemas/metadata";
 import { getOffset, getTotalPages } from "../utils/pagination";
 import { attachLinks, getPaginationLinks } from "../utils/links";
-import { getColumns } from "../utils/db";
 import { buildCountQuery, buildDeleteQuery, buildInsertQuery, buildPaginatedSelectAllQuery, buildSelectOneQuery, buildUpdateQuery } from "../utils/queries";
 import { handleTransaction } from "../handlers/transactions";
 import { validate, validateId, validatePagination, validateResponse } from "../utils/validation";
