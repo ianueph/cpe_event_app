@@ -1,5 +1,6 @@
 import createHttpError from "http-errors";
 import { Id, idSchema, PaginationParameter, paginationParameterSchema, apiResponseSchema } from "../../../../shared/zod_schemas/metadata";
+import { studentSchema, StudentSchema } from "../../../../shared/zod_schemas/students";
 import { z, ZodType } from "zod/v4";
 
 export function validate<T, S extends ZodType<T>>(
@@ -25,6 +26,12 @@ export function validateId(
     id: string | number
 ) : Id {
     return validate(id, idSchema);
+}
+
+export function validateStudentNumber(
+    student_number: string
+) : string {
+    return validate(student_number, studentSchema.shape.student_number)
 }
 
 export function validateResponse<T extends z.ZodType>(
