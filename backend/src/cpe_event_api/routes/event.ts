@@ -7,7 +7,7 @@ DELETE	/events/:id 	TODO: Batch
 */
 
 import express from "express";
-import {Event, eventCreateSchema, EventData, eventDataSchema, EventResponse, eventResponseSchema, eventSchema, eventUpdateSchema} from "../../../../shared/zod_schemas/events"
+import {Event, EventCreate, eventCreateSchema, EventData, eventDataSchema, EventResponse, eventResponseSchema, eventSchema, eventUpdateSchema} from "../../../../shared/zod_schemas/events"
 import { eventIdExists } from '../handlers/checkers';
 import { QueryConfig } from "pg";
 import db from '../db';
@@ -17,7 +17,7 @@ import { attachLinks, getPaginationLinks } from "../utils/links";
 import { getColumns } from "../utils/db";
 import { buildCountQuery, buildDeleteQuery, buildInsertQuery, buildPaginatedSelectAllQuery, buildSelectOneQuery, buildUpdateQuery } from "../utils/queries";
 import { handleTransaction } from "../handlers/transactions";
-import { validateId, validatePagination, validateResponse } from "../utils/validation";
+import { validate, validateId, validatePagination, validateResponse } from "../utils/validation";
 
 require('express-async-errors');
 const router = express.Router()
@@ -66,17 +66,13 @@ router.route("/")
 		}
 		const parsedResponse = validateResponse(response, eventResponseSchema)
 		
-		res.status(200).json(parsedResponse);
+		res.status(200).json(parsedResponse);	
 	})
 	.post(async (req, res) => {
 		const event = req.body;  
-		const parsed = eventCreateSchema.safeParse(event);
-		if (!parsed.success) { 
-			res.status(400);
-			throw parsed.error;
-		}
+		const parsed = validate(event, eventCreateSchema)
 
-		const insertQuery : QueryConfig = await buildInsertQuery('events', parsed.data)
+		const insertQuery : QueryConfig = await buildInsertQuery('events', parsed)
 		const result = await db.query(insertQuery);
 		if (!result.rowCount) {
 			res.status(500)
@@ -87,13 +83,9 @@ router.route("/")
 			{rel: "self", href: `/events/${event.id}`}
 		]))
 
-		const parsedData = eventDataSchema.safeParse(data[0]);
-		if (!parsedData.success) { 
-			res.status(500)
-			throw parsedData.error;
-		}
+		const parsedData = validate(data[0], eventDataSchema)
 
-		res.status(201).json(parsedData.data);
+		res.status(201).json(parsedData);
 	})
 
 router.route('/:id')
@@ -106,38 +98,26 @@ router.route('/:id')
 			{rel: "self", href: `/events/${event.id}`}
 		]))
 
-		const parsedData = eventDataSchema.safeParse(data[0]);
-		if (!parsedData.success) { 
-			res.status(500)
-			throw parsedData.error;
-		}
+		const parsedData = validate(data[0], eventDataSchema)
 
-		res.status(200).json(parsedData.data);
+		res.status(200).json(parsedData);
 	})
 	.put(async (req, res) => {
 		const id = parseInt(req.params.id)
 		req.body.id = id
 
-		const parsed = eventUpdateSchema.safeParse(req.body);
-		if (!parsed.success) { 
-			res.status(500)
-			throw parsed.error;
-		}
+		const parsed = validate(req.body, eventUpdateSchema)
 
-		const query : QueryConfig = await buildUpdateQuery('events', 'id', id, parsed.data)
+		const query : QueryConfig = await buildUpdateQuery('events', 'id', id, parsed)
 		const result = await db.query(query);
 
 		const data = attachLinks(result.rows, (event) => ([
 			{rel: "self", href: `/events/${id}`}
 		]))
 
-		const parsedData = eventDataSchema.safeParse(data[0]);
-		if (!parsedData.success) { 
-			res.status(500)
-			throw parsedData.error;
-		}
+		const parsedData = validate(data[0], eventDataSchema)
 
-		res.status(200).json(parsedData.data);
+		res.status(200).json(parsedData);
 	})
 	.delete(async (req, res) => {
 		const id = parseInt(req.params.id);
@@ -149,13 +129,9 @@ router.route('/:id')
 			{rel: "self", href: `/events/${event.id}`}
 		]))
 
-		const parsedData = eventDataSchema.safeParse(data[0]);
-		if (!parsedData.success) { 
-			res.status(500)
-			throw parsedData.error;
-		}
+		const parsedData = validate(data[0], eventDataSchema)
 
-		res.status(200).json(parsedData.data);
+		res.status(200).json(parsedData);
 	})
 
 export default router;
